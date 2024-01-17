@@ -1,4 +1,5 @@
 mod file_handler;
+mod tetrimino;
 
 extern crate sdl2;
 
