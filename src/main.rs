@@ -1,5 +1,6 @@
 mod file_handler;
 mod tetrimino;
+mod tetris_struct;
 
 extern crate sdl2;
 

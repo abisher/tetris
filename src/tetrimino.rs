@@ -2,7 +2,7 @@ extern crate rand;
 
 fn create_new_tetrimino() -> Tetrimino {
     static mut PREV: u8 = 7;
-    let mut rand_rb = rand::random::<u8>() % 7;
+    let mut rand_rb = rand::random::<u8>() % 7; // TODO: let having no more than two tetrimino(now only one)
 
     if unsafe { PREV } == rand_rb {
         rand_rb = rand::random::<u8>() % 7;
@@ -31,11 +31,11 @@ trait TetriminoGenerator {
     fn new() -> Tetrimino;
 }
 
-struct Tetrimino {
-    states: States,
-    x: isize,
-    y: usize,
-    current_state: u8,
+pub struct Tetrimino {
+    pub states: States,
+    pub x: isize,
+    pub y: usize,
+    pub current_state: u8,
 }
 
 impl Tetrimino {
@@ -80,7 +80,7 @@ impl Tetrimino {
         }
     }
 
-    fn test_current_position(&self, game_map: &[Vec<u8>], ) -> bool {
+    fn test_current_position(&self, game_map: &[Vec<u8>]) -> bool {
         self.test_position(game_map, self.current_state as usize, self.x, self.y)
     }
 }
