@@ -1,18 +1,17 @@
-use sdl2::libc::ip_mreq_source;
-use crate::tetrimino::Tetrimino;
+use crate::tetrimino::{Tetrimino, TetriminoJ, TetriminoI, TetriminoT, TetriminoZ, TetriminoS, TetriminoO, TetriminoL, TetriminoGenerator};
 
 type GameMap = Vec<Vec<u8>>;
 
-struct Tetris {
-    game_map: GameMap,
-    current_level: u32,
-    score: u32,
-    nb_lines: u32,
-    current_piece: Option<Tetrimino>,
+pub struct Tetris {
+    pub game_map: GameMap,
+    pub current_level: u32,
+    pub score: u32,
+    pub nb_lines: u32,
+    pub current_piece: Option<Tetrimino>,
 }
 
 impl Tetris {
-    fn new() -> Tetris {
+    pub(crate) fn new() -> Tetris {
         let mut game_map = Vec::new();
 
         for _ in 0..16 {
@@ -24,6 +23,28 @@ impl Tetris {
             score: 0,
             nb_lines: 0,
             current_piece: None,
+        }
+    }
+
+    pub fn create_new_tetrimino(&mut self) -> Tetrimino {
+        static mut PREV: u8 = 7;
+        let mut rand_rb = rand::random::<u8>() % 7; // TODO: let having no more than two tetrimino(now only one)
+
+        if unsafe { PREV } == rand_rb {
+            rand_rb = rand::random::<u8>() % 7;
+        }
+
+        unsafe { PREV = rand_rb; }
+
+        match rand_rb {
+            0 => TetriminoI::new(),
+            1 => TetriminoJ::new(),
+            2 => TetriminoL::new(),
+            3 => TetriminoO::new(),
+            4 => TetriminoS::new(),
+            5 => TetriminoZ::new(),
+            6 => TetriminoT::new(),
+            _ => unreachable!()
         }
     }
 
@@ -52,7 +73,7 @@ impl Tetris {
         }
     }
 
-    fn make_permanent(&mut self) {
+    pub fn make_permanent(&mut self) {
         if let Some(ref mut piece) = self.current_piece {
             let mut shift_y = 0;
 
@@ -78,5 +99,3 @@ impl Tetris {
         self.current_piece = None;
     }
 }
-
-

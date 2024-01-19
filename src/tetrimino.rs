@@ -1,33 +1,11 @@
 extern crate rand;
 
-fn create_new_tetrimino() -> Tetrimino {
-    static mut PREV: u8 = 7;
-    let mut rand_rb = rand::random::<u8>() % 7; // TODO: let having no more than two tetrimino(now only one)
-
-    if unsafe { PREV } == rand_rb {
-        rand_rb = rand::random::<u8>() % 7;
-    }
-
-    unsafe { PREV = rand_rb; }
-
-    match rand_rb {
-        0 => TetriminoI::new(),
-        1 => TetriminoJ::new(),
-        2 => TetriminoL::new(),
-        3 => TetriminoO::new(),
-        4 => TetriminoS::new(),
-        5 => TetriminoZ::new(),
-        6 => TetriminoT::new(),
-        _ => unreachable!()
-    }
-}
-
 
 type Piece = Vec<Vec<u8>>;
 type States = Vec<Piece>;
 
 
-trait TetriminoGenerator {
+pub(crate) trait TetriminoGenerator {
     fn new() -> Tetrimino;
 }
 
@@ -39,7 +17,7 @@ pub struct Tetrimino {
 }
 
 impl Tetrimino {
-    fn rotate(&mut self, game_map: &[Vec<u8>]) {
+    pub fn rotate(&mut self, game_map: &[Vec<u8>]) {
         let mut tmp_state = self.current_state + 1;
         if self.current_state as usize >= self.states.len() {
             self.current_state = 0;
@@ -54,7 +32,7 @@ impl Tetrimino {
         }
     }
 
-    fn test_position(&self, game_map: &[Vec<u8>], tmp_state: usize,
+    pub fn test_position(&self, game_map: &[Vec<u8>], tmp_state: usize,
                      x: isize, y: usize) -> bool {
         for decal_y in 0..4 {
             for decal_x in 0..4 {
@@ -70,7 +48,7 @@ impl Tetrimino {
         true
     }
 
-    fn change_position(&mut self, game_map: &[Vec<u8>], new_x: isize, new_y: usize) -> bool {
+    pub fn change_position(&mut self, game_map: &[Vec<u8>], new_x: isize, new_y: usize) -> bool {
         if self.test_position(game_map, self.current_state as usize, new_x, new_y) == true {
             self.x = new_x;
             self.y = new_y;
@@ -80,12 +58,12 @@ impl Tetrimino {
         }
     }
 
-    fn test_current_position(&self, game_map: &[Vec<u8>]) -> bool {
+    pub fn test_current_position(&self, game_map: &[Vec<u8>]) -> bool {
         self.test_position(game_map, self.current_state as usize, self.x, self.y)
     }
 }
 
-struct TetriminoI;
+pub struct TetriminoI;
 
 impl TetriminoGenerator for TetriminoI {
     fn new() -> Tetrimino {
@@ -105,10 +83,10 @@ impl TetriminoGenerator for TetriminoI {
     }
 }
 
-struct TetriminoJ;
+pub struct TetriminoJ;
 
 impl TetriminoGenerator for TetriminoJ {
-    fn new() -> Tetrimino {
+    pub fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![2, 2, 2, 2],
                               vec![2, 0, 0, 0],
@@ -133,10 +111,10 @@ impl TetriminoGenerator for TetriminoJ {
     }
 }
 
-struct TetriminoL;
+pub struct TetriminoL;
 
 impl TetriminoGenerator for TetriminoL {
-    fn new() -> Tetrimino {
+    pub fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![3, 3, 3, 0],
                               vec![0, 0, 3, 0],
@@ -161,10 +139,10 @@ impl TetriminoGenerator for TetriminoL {
     }
 }
 
-struct TetriminoO;
+pub struct TetriminoO;
 
 impl TetriminoGenerator for TetriminoO {
-    fn new() -> Tetrimino {
+    pub fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![4, 4, 0, 0],
                               vec![4, 4, 0, 0],
@@ -178,10 +156,10 @@ impl TetriminoGenerator for TetriminoO {
     }
 }
 
-struct TetriminoS;
+pub struct TetriminoS;
 
 impl TetriminoGenerator for TetriminoS {
-    fn new() -> Tetrimino {
+    pub fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![0, 5, 5, 0],
                               vec![5, 5, 0, 0],
@@ -200,7 +178,7 @@ impl TetriminoGenerator for TetriminoS {
 }
 
 
-struct TetriminoZ;
+pub struct TetriminoZ;
 
 impl TetriminoGenerator for TetriminoZ {
     fn new() -> Tetrimino {
@@ -221,10 +199,10 @@ impl TetriminoGenerator for TetriminoZ {
     }
 }
 
-struct TetriminoT;
+pub struct TetriminoT;
 
 impl TetriminoGenerator for TetriminoT {
-    fn new() -> Tetrimino {
+    pub fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![7, 7, 7, 0],
                               vec![0, 7, 0, 0],
