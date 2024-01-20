@@ -5,7 +5,7 @@ type Piece = Vec<Vec<u8>>;
 type States = Vec<Piece>;
 
 
-pub(crate) trait TetriminoGenerator {
+pub trait TetriminoGenerator {
     fn new() -> Tetrimino;
 }
 
@@ -33,7 +33,7 @@ impl Tetrimino {
     }
 
     pub fn test_position(&self, game_map: &[Vec<u8>], tmp_state: usize,
-                     x: isize, y: usize) -> bool {
+                         x: isize, y: usize) -> bool {
         for decal_y in 0..4 {
             for decal_x in 0..4 {
                 let x = x + decal_x;
@@ -86,7 +86,7 @@ impl TetriminoGenerator for TetriminoI {
 pub struct TetriminoJ;
 
 impl TetriminoGenerator for TetriminoJ {
-    pub fn new() -> Tetrimino {
+    fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![2, 2, 2, 2],
                               vec![2, 0, 0, 0],
@@ -114,7 +114,7 @@ impl TetriminoGenerator for TetriminoJ {
 pub struct TetriminoL;
 
 impl TetriminoGenerator for TetriminoL {
-    pub fn new() -> Tetrimino {
+    fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![3, 3, 3, 0],
                               vec![0, 0, 3, 0],
@@ -142,7 +142,7 @@ impl TetriminoGenerator for TetriminoL {
 pub struct TetriminoO;
 
 impl TetriminoGenerator for TetriminoO {
-    pub fn new() -> Tetrimino {
+    fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![4, 4, 0, 0],
                               vec![4, 4, 0, 0],
@@ -159,7 +159,7 @@ impl TetriminoGenerator for TetriminoO {
 pub struct TetriminoS;
 
 impl TetriminoGenerator for TetriminoS {
-    pub fn new() -> Tetrimino {
+    fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![0, 5, 5, 0],
                               vec![5, 5, 0, 0],
@@ -202,7 +202,7 @@ impl TetriminoGenerator for TetriminoZ {
 pub struct TetriminoT;
 
 impl TetriminoGenerator for TetriminoT {
-    pub fn new() -> Tetrimino {
+    fn new() -> Tetrimino {
         Tetrimino {
             states: vec![vec![vec![7, 7, 7, 0],
                               vec![0, 7, 0, 0],
