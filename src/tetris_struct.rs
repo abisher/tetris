@@ -1,3 +1,4 @@
+use std::time::SystemTime;
 use crate::tetrimino::{Tetrimino, TetriminoJ, TetriminoI, TetriminoT, TetriminoZ, TetriminoS, TetriminoO, TetriminoL, TetriminoGenerator};
 
 
@@ -126,9 +127,16 @@ impl Tetris {
 
     fn increase_line(&mut self) {
         self.nb_lines += 1;
-        if self.nb_lines > LEVEL_LINES[self.current_level as usize - 1] {
+        if self.nb_lines > LEVEL_LINES[self.current_level as usize - 1] {}
+    }
+}
 
+fn is_time_over(tetris: &mut Tetris, timer: &SystemTime) -> bool {
+    match timer.elapsed() {
+        Ok(elapsed) => {
+            let millis = elapsed.as_secs() as u32 * 1000 + elapsed.subsec_nanos() / 1_000_000;
+            millis > LEVEL_TIMES[tetris.current_level as usize - 1]
         }
-
+        Err(_) => false
     }
 }

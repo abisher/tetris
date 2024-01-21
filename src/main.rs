@@ -14,14 +14,15 @@ use std::thread::sleep;
 use sdl2::EventPump;
 
 use sdl2::render::{Canvas, Texture, TextureCreator};
-use sdl2::rect::Rect;
 use sdl2::video::{Window, WindowContext};
 
 use sdl2::image::{LoadTexture, InitFlag};
 
 use tetris_struct::{Tetris};
+use file_handler::{load_highscores_and_lines, save_highscores};
 
 const TEXTURE_SIZE: u32 = 32;
+const NB_HIGHSCORES: usize = 5;
 
 #[derive(Clone, Copy)]
 enum TextureColor {
@@ -104,11 +105,50 @@ fn handle_events(tetris: &mut Tetris, quit: &mut bool, timer: &mut SystemTime,
 }
 
 fn print_game_info(tetris: &mut Tetris) {
-    println!("Game over!");
+    let mut new_highest_highscore = true;
+    let mut new_highest_lines_sent = true;
 
-    println!("Score:            {}", tetris.score);
-    //println!("Number of lines:  {}", tetris.nb_lines);
+    if let Some((mut highscores, mut lines_sent)) =
+        load_highscores_and_lines() {
+        new_highest_highscore = update_vec(&mut highscores, tetris.score);
+        new_highest_lines_sent = update_vec(&mut lines_sent, tetris.nb_lines);
+
+        if new_highest_lines_sent || new_highest_lines_sent {
+            save_highscores(&highscores, &lines_sent);
+        }
+    } else {
+        save_highscores(&[tetris.score], &[tetris.nb_lines]);
+    }
+
+
+    println!("Game over...");
+    println!("Score: {}{}",
+             tetris.score,
+             if new_highest_highscore { " [NEW HIGHSCORE]" } else {
+                 ""
+             });
+    println!("Number of lines: {}{}",
+             tetris.nb_lines,
+             if new_highest_lines_sent { " [NEW HIGHSCORE]" } else {
+                 ""
+             });
     println!("Current level:      {}", tetris.current_level);
+}
+
+fn update_vec(v: &mut Vec<u32>, value: u32) -> bool {
+    if v.len() < NB_HIGHSCORES {
+        v.push(value);
+        v.sort();
+        true
+    } else {
+        for entry in v.iter_mut() {
+            if value > *entry {
+                *entry = value;
+                return true;
+            }
+        }
+        false
+    }
 }
 
 
@@ -136,13 +176,10 @@ fn main() {
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
 
 
-    let image_texture = texture_creator.load_texture("assets/my_image.jpg")
-        .expect("Couldn't load image");
-
     let mut event_pump = sdl_content.event_pump()
         .expect("Failed to get SDL event pump");
 
-    let mut curr_time = SystemTime::now();
+
     let mut tetris = Tetris::new();
     let mut timer = SystemTime::now();
 
@@ -183,16 +220,8 @@ fn main() {
             break;
         }
 
-
         canvas.set_draw_color(Color::RGB(255, 0, 0));
         canvas.clear();
-
-
-        // canvas.copy(&square_texture,
-        //             None,
-        //             Rect::new(0, 0, TEXTURE_SIZE, TEXTURE_SIZE))
-        //     .expect("Couldn't copy texture into window");
-        canvas.copy(&image_texture, None, None).expect("Render failed");
 
         canvas.present();
         sleep(Duration::new(0, 1_000_000u32) / 60);
