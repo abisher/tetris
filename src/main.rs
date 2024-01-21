@@ -21,8 +21,11 @@ use sdl2::image::{LoadTexture, InitFlag};
 use tetris_struct::{Tetris};
 use file_handler::{load_highscores_and_lines, save_highscores};
 
-const TEXTURE_SIZE: u32 = 32;
+const TETRIS_HEIGHT: usize = 40;
 const NB_HIGHSCORES: usize = 5;
+
+const WIDTH: u32 = 600;
+const HEIGHT: u32 = 800;
 
 #[derive(Clone, Copy)]
 enum TextureColor {
@@ -32,17 +35,10 @@ enum TextureColor {
 
 fn create_texture_rect<'a>(canvas: &mut Canvas<Window>,
                            texture_creator: &'a TextureCreator<WindowContext>,
-                           color: TextureColor, size: u32) -> Option<Texture<'a>> {
-    if let Ok(mut square_texture) = texture_creator.create_texture_target(None, size, size) {
+                           r: u8, g: u8, b: u8, width: u32, height: u32) -> Option<Texture<'a>> {
+    if let Ok(mut square_texture) = texture_creator.create_texture_target(None, width, height) {
         canvas.with_texture_canvas(&mut square_texture, |texture| {
-            match color {
-                TextureColor::Green => {
-                    texture.set_draw_color(Color::RGB(0, 255, 0));
-                }
-                TextureColor::Blue => {
-                    texture.set_draw_color(Color::RGB(0, 0, 255));
-                }
-            }
+            texture.set_draw_color(Color::RGB(r, g, b));
             texture.clear();
         }).expect("Failed to color a texture");
         Some(square_texture)
@@ -156,11 +152,16 @@ fn main() {
     let sdl_content = sdl2::init().expect("SDL initialization failed");
     let video_subsystem = sdl_content.video()
         .expect("Couldn't get SDL video subsystem");
-
     sdl2::image::init(InitFlag::PNG | InitFlag::JPG)
         .expect("Couldn't initialize image context");
 
-    let window = video_subsystem.window("Tetris", 800, 600)
+    let mut tetris = Tetris::new();
+    let mut timer = SystemTime::now();
+
+    let grid_x = (WIDTH - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
+    let grid_y = (HEIGHT - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
+
+    let window = video_subsystem.window("Tetris", WIDTH, HEIGHT)
         .position_centered()
         .opengl()
         .build()
@@ -175,13 +176,30 @@ fn main() {
 
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
 
+    let grid = create_texture_rect(&mut canvas, &texture_creator, 0, 0, 0,
+                                   TETRIS_HEIGHT as u32 * 10, TETRIS_HEIGHT as u32 * 16)
+        .expect("Failed to create a texture");
+
+    let boarder = create_texture_rect(&mut canvas, &texture_creator, 255, 255, 255,
+                                      TETRIS_HEIGHT as u32 * 10 + 20, TETRIS_HEIGHT as u32 * 16 + 20)
+        .expect("Failed to create a texture");
+
+    macro_rules! texture {
+        ($r: expr, $g: expr, $b: expr) => (
+            create_texture_rect(&mut , &texture_creator,
+            $r, $g, $b,
+            TETRIS_HEIGHT as u32,
+            TETRIS_HEIGHT as u32).unwrap()
+        );
+    }
+
+    let textures = [texture!(255, 69, 69), texture!(255, 220, 69),
+        texture!(237, 150, 37), texture!(171, 99, 237), texture!(77, 149,
+239), texture!(39, 218, 225), texture!(45, 216, 47)];
+
 
     let mut event_pump = sdl_content.event_pump()
         .expect("Failed to get SDL event pump");
-
-
-    let mut tetris = Tetris::new();
-    let mut timer = SystemTime::now();
 
     loop {
         if match timer.elapsed() {
