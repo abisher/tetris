@@ -18,7 +18,7 @@ use sdl2::video::{Window, WindowContext};
 
 use sdl2::image::{LoadTexture, InitFlag};
 
-use tetris_struct::{Tetris};
+use tetris_struct::{Tetris, is_time_over};
 use file_handler::{load_highscores_and_lines, save_highscores};
 
 const TETRIS_HEIGHT: usize = 40;
@@ -157,6 +157,8 @@ fn main() {
 
     let mut tetris = Tetris::new();
     let mut timer = SystemTime::now();
+    let mut event_pump = sdl_content.event_pump()
+        .expect("Failed to get SDL event pump");
 
     let grid_x = (WIDTH - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
     let grid_y = (HEIGHT - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
@@ -198,20 +200,15 @@ fn main() {
 239), texture!(39, 218, 225), texture!(45, 216, 47)];
 
 
-    let mut event_pump = sdl_content.event_pump()
-        .expect("Failed to get SDL event pump");
-
     loop {
-        if match timer.elapsed() {
-            Ok(elapsed) => elapsed.as_secs() >= 1,
-            Err(_) => false
-        } {
+        if is_time_over(&mut tetris, &timer) {
             let mut make_permanent = false;
             if let Some(ref mut piece) = tetris.current_piece {
                 let x = piece.x;
                 let y = piece.y + 1;
                 make_permanent = !piece.change_position(&tetris.game_map, x, y);
             }
+
             if make_permanent {
                 tetris.make_permanent();
             }

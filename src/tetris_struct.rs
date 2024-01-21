@@ -131,7 +131,7 @@ impl Tetris {
     }
 }
 
-fn is_time_over(tetris: &mut Tetris, timer: &SystemTime) -> bool {
+pub fn is_time_over(tetris: &mut Tetris, timer: &SystemTime) -> bool {
     match timer.elapsed() {
         Ok(elapsed) => {
             let millis = elapsed.as_secs() as u32 * 1000 + elapsed.subsec_nanos() / 1_000_000;
