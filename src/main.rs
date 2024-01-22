@@ -17,6 +17,7 @@ use sdl2::render::{Canvas, Texture, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 
 use sdl2::image::{LoadTexture, InitFlag};
+use sdl2::rect::Rect;
 
 use tetris_struct::{Tetris, is_time_over};
 use file_handler::{load_highscores_and_lines, save_highscores};
@@ -161,7 +162,7 @@ fn main() {
         .expect("Failed to get SDL event pump");
 
     let grid_x = (WIDTH - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
-    let grid_y = (HEIGHT - TETRIS_HEIGHT as u32 * 10) as i32 / 2;
+    let grid_y = (HEIGHT - TETRIS_HEIGHT as u32 * 16) as i32 / 2;
 
     let window = video_subsystem.window("Tetris", WIDTH, HEIGHT)
         .position_centered()
@@ -182,8 +183,8 @@ fn main() {
                                    TETRIS_HEIGHT as u32 * 10, TETRIS_HEIGHT as u32 * 16)
         .expect("Failed to create a texture");
 
-    let boarder = create_texture_rect(&mut canvas, &texture_creator, 255, 255, 255,
-                                      TETRIS_HEIGHT as u32 * 10 + 20, TETRIS_HEIGHT as u32 * 16 + 20)
+    let border = create_texture_rect(&mut canvas, &texture_creator, 255, 255, 255,
+                                     TETRIS_HEIGHT as u32 * 10 + 20, TETRIS_HEIGHT as u32 * 16 + 20)
         .expect("Failed to create a texture");
 
     macro_rules! texture {
@@ -215,6 +216,20 @@ fn main() {
 
             timer = SystemTime::now();
         }
+
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        canvas.clear();
+        canvas.copy(&border, None,
+                    Rect::new((WIDTH - TETRIS_HEIGHT as u32 * 10) as i32 / 2 - 10,
+                              (HEIGHT - TETRIS_HEIGHT as u32 * 16) as i32 / 2 - 10,
+                              TETRIS_HEIGHT as u32 * 10 + 20, TETRIS_HEIGHT as u32 * 16 + 20))
+            .expect("Couldn't copy texture into window");
+        canvas.copy(&grid, None,
+                    Rect::new((WIDTH - TETRIS_HEIGHT as u32 * 10) as i32 / 2,
+                              (HEIGHT - TETRIS_HEIGHT as u32 * 16) as i32 / 2,
+                              TETRIS_HEIGHT as u32 * 10, TETRIS_HEIGHT as u32 * 16))
+            .expect("Couldn't copy texture into window");
+
         // Drawing tetris
         if tetris.current_piece.is_none() {
             let current_piece = tetris.create_new_tetrimino();
@@ -227,7 +242,19 @@ fn main() {
         let mut quit = false;
         if !handle_events(&mut tetris, &mut quit, &mut timer, &mut event_pump) {
             if let Some(ref mut piece) = tetris.current_piece {
-                // Drawing current tetrimino here
+                for (line_nb, line) in piece.states[piece.current_state as usize]
+                    .iter().enumerate() {
+                    for (case_nb, case) in line.iter().enumerate() {
+                        if *case == 0 {
+                            continue;
+                        }
+                        canvas.copy(&textures[*case as usize - 1], None,
+                                    Rect::new(grid_x + (piece.x + case_nb as isize) as i32 * TETRIS_HEIGHT as i32,
+                                              grid_y + (piece.y + line_nb) as i32 * TETRIS_HEIGHT as i32,
+                                              TETRIS_HEIGHT as u32, TETRIS_HEIGHT as u32))
+                            .expect("Couldn't copy texture into window");
+                    }
+                }
             }
         }
         if quit {
