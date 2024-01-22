@@ -10,4 +10,5 @@ sdl2 = { git = "https://github.com/Rust-SDL2/rust-sdl2" }
 rand = "0.8.5"
 
 [features]
-default = ["sdl2/image"]
+default = ["sdl2/image", "sdl2/ttf"]
+

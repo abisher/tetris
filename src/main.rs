@@ -48,6 +48,13 @@ fn create_texture_rect<'a>(canvas: &mut Canvas<Window>,
     }
 }
 
+fn create_texture_from_text<'a>(texture_creator: &'a TextureCreator<WindowContext>,
+                                font: &sdl2::ttf::Font, text: &str, r: u8, g: u8, b: u8) -> Option<Texture<'a>> {
+    if let Ok(surface) = font.render(text).blended(Color::RGB(r, g, b)) {
+        texture_creator.create_texture_from_surface(&surface).ok()
+    } else { None }
+}
+
 fn handle_events(tetris: &mut Tetris, quit: &mut bool, timer: &mut SystemTime,
                  event_pump: &mut EventPump) -> bool {
     let mut make_permanent = false;
@@ -155,6 +162,13 @@ fn main() {
         .expect("Couldn't get SDL video subsystem");
     sdl2::image::init(InitFlag::PNG | InitFlag::JPG)
         .expect("Couldn't initialize image context");
+    let ttf_context = sdl2::ttf::init()
+        .expect("SDL TTF initialization failed");
+
+    let font = ttf_context.load_font("assets/lucida_sans_italic.ttf", 128)
+        .except("Couldn't load the font");
+
+    //font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     let mut tetris = Tetris::new();
     let mut timer = SystemTime::now();
