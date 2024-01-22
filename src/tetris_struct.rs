@@ -125,9 +125,15 @@ impl Tetris {
         self.score += to_add;
     }
 
+    fn increase_level(&mut self) {
+        self.current_level += 1;
+    }
+
     fn increase_line(&mut self) {
         self.nb_lines += 1;
-        if self.nb_lines > LEVEL_LINES[self.current_level as usize - 1] {}
+        if self.nb_lines > LEVEL_LINES[self.current_level as usize - 1] {
+            self.increase_level();
+        }
     }
 }
 

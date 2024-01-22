@@ -189,7 +189,7 @@ fn main() {
 
     macro_rules! texture {
         ($r: expr, $g: expr, $b: expr) => (
-            create_texture_rect(&mut , &texture_creator,
+            create_texture_rect(&mut canvas, &texture_creator,
             $r, $g, $b,
             TETRIS_HEIGHT as u32,
             TETRIS_HEIGHT as u32).unwrap()
@@ -257,13 +257,25 @@ fn main() {
                 }
             }
         }
+
         if quit {
             print_game_info(&mut tetris);
             break;
         }
 
-        canvas.set_draw_color(Color::RGB(255, 0, 0));
-        canvas.clear();
+        for (line_nb, line) in tetris.game_map.iter().enumerate() {
+            for (case_nb, case) in line.iter().enumerate() {
+                if *case == 0 {
+                    continue;
+                }
+
+                canvas.copy(&textures[*case as usize - 1],
+                            None, Rect::new(grid_x + case_nb as i32 * TETRIS_HEIGHT as i32,
+                                            grid_y + line_nb as i32 * TETRIS_HEIGHT as i32,
+                                            TETRIS_HEIGHT as u32, TETRIS_HEIGHT as u32))
+                    .expect("Couldn't copy texture into window");
+            }
+        }
 
         canvas.present();
         sleep(Duration::new(0, 1_000_000u32) / 60);
